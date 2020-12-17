@@ -4,6 +4,7 @@
  */
 
 #include <thread>
+#include <gmock/gmock-nice-strict.h>
 
 #include "gtest/gtest.h"
 
@@ -46,6 +47,22 @@ TEST(ThreadStateTest, StateGuard) {
             EXPECT_EQ(mm::ThreadState::kNative, threadData->state());
         }
         EXPECT_EQ(initialState, threadData->state());
+    });
+    t.join();
+}
+
+TEST(ThreadStateTest, callKotlin) {
+    std::thread t([]() {
+        mm::ThreadRegistry::Instance().RegisterCurrentThread();
+
+        testing::StrictMock<testing::MockFunction<int32_t(int32_t)>> simpleFunction;
+        EXPECT_CALL(simpleFunction, Call)
+            .WillOnce([](int32_t arg) {
+                EXPECT_EQ(mm::ThreadRegistry::Instance().CurrentThreadData()->state(), mm::ThreadState::kRunnable);
+                return arg * 2;
+            });
+        int32_t result = callKotlin(simpleFunction, 42);
+
     });
     t.join();
 }
