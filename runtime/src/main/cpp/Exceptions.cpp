@@ -252,6 +252,10 @@ RUNTIME_NORETURN void TerminateWithUnhandledException(KRef throwable) {
   });
 }
 
+RUNTIME_NORETURN void TerminateWithUnhandledExceptionHolder(ExceptionObjHolderBase* holder) {
+    TerminateWithUnhandledException(static_cast<ExceptionObjHolder*>(holder)->obj());
+}
+
 // Some libstdc++-based targets has limited support for std::current_exception and other C++11 functions.
 // This restriction can be lifted later when toolchains will be updated.
 #if KONAN_HAS_CXX11_EXCEPTION_FUNCTIONS
